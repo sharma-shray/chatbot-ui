@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import exp from 'constants';
 
 test('Chats Include Profile Context', async ({ page }) => {
   await page.goto('localhost:3000/*/chat');
@@ -16,7 +17,6 @@ test('Context Length: extist', async ({ page }) => {
   expect(locator).toBeTruthy();
 });
 
-
 test('check value changes when edited', async ({ page }) => {
   await page.goto('localhost:3000/*/chat');
 
@@ -28,4 +28,28 @@ test('check value changes when edited', async ({ page }) => {
 
   // has changed as expected
   expect(initialValue).not.toBe(updatedValue); 
+});
+
+test('Delete the workspace', async ({ page }) => {
+  
+  await page.goto('localhost:3000/*/chat');
+
+  const dialogSelector = '[role="dialog"]';
+  await page.waitForSelector(dialogSelector, { state: 'visible' });
+
+  // Check that the delete warning header is present
+  const deleteHeader = "WARNING: Deleting a workspace will delete all of its data.";
+  const header = await page.getByText(deleteHeader);
+  expect(header).not.toBeNull();
+
+  // Fill the input field with "New Workspace"
+  const inputPlaceholder = "Type the name of this workspace to confirm";
+  const input = await page.getByPlaceholder(inputPlaceholder);
+  await input.fill("New Workspace");
+  expect(input).not.toBeNull();
+
+  // Enable and click the "Delete" button
+  const deleteButton = await page.getByRole('button', { name: 'Delete' });
+  await deleteButton.evaluate(button => button.disabled = false);
+  await deleteButton.click();
 });
